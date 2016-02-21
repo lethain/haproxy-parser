@@ -25,7 +25,7 @@ func Parse(r io.Reader) ([]Section, error) {
 
 	for {
 		tok, lit := sc.Scan()
-		fmt.Printf("%v: %v\n", tok, lit)
+		fmt.Printf("%v:\t%v\n", humanTokens[tok], lit)
 		if tok == EOF || tok == ILLEGAL {
 			break
 		}		

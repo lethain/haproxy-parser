@@ -14,11 +14,20 @@ const (
 	SPACE
 	NEWLINE
 	TAB
-	HEADING
-	KEY
-	VAL
-	QUOTED
+	STRING
 )
+
+var humanTokens = map[Token]string {
+	ILLEGAL: "ILLEGAL",
+	EOF: "EOF",
+	COMMENT: "COMMENT",
+	SPACE: "SPACE",
+	NEWLINE: "NEWLINE",
+	TAB: "TAB",
+	STRING: "STRING",
+}
+
+
 
 var eof = rune(0)
 
@@ -45,9 +54,14 @@ func isNotNewline(ch rune) bool {
 	return !isNewline(ch)
 }
 
+func isQuote(ch rune) bool {
+	return ch == '"'
+}
+
 
 func isLetter(ch rune) bool {
-	return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z')
+	return !(isQuote(ch) || isNewline(ch) || isSpace(ch) || isTab(ch) || ch == eof)
+	// return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || ch == '.' || ch == '/' || ch == ':' || (ch >= '0' && ch <= '9') || ch == '-' || ch == '_' || ch == '\\' || ch == '(' || ch == ')'
 }
 
 // Scanner represents a lexical scanner.
@@ -85,42 +99,41 @@ func (s *Scanner) Scan() (Token, string) {
 
 	if isComment(ch) {
 		return s.ScanContiguous(COMMENT, isNotNewline, buf)
+	} else if isNewline(ch) {
+		return s.ScanContiguous(NEWLINE, isNewline, buf)
+	} else if isTab(ch) {
+		return TAB, ""
+	} else if isQuote(ch) {
+		return s.ScanQuoted(STRING, buf)
+	} else if isLetter(ch) {
+		return s.ScanContiguous(STRING, isLetter, buf)
+	} else if isSpace(ch) {
+		return s.ScanContiguous(SPACE, isSpace, buf)
+	} else if ch == eof {
+		return EOF, ""
 	}
-	
+
 	return ILLEGAL, string(ch)
 }
 
 func (s *Scanner) ScanContiguous(tok Token, checker tokenTypeChecker, acc bytes.Buffer) (Token, string) {
-	next := s.Read()
-	if checker(next) {
-		acc.WriteRune(next)
+	ch := s.read()
+	if checker(ch) {
+		acc.WriteRune(ch)
 		return s.ScanContiguous(tok, checker, acc)
 	}
 	s.unread()
 	return tok, acc.String()
 }
 
-
-
-	// If we see whitespace then consume all contiguous whitespace.
-	// If we see a letter then consume as an ident or reserved word.
-	/*
-	if isSpace(ch) {
-		s.unread()
-		return s.scanWhitespace()
-	} else if isLetter(ch) {
-		s.unread()
-		return s.scanIdent()
+func (s *Scanner) ScanQuoted(tok Token, acc bytes.Buffer) (Token, string) {
+	ch := s.read()
+	if isNewline(ch) {
+		return ILLEGAL, acc.String()
 	}
-
-	// Otherwise read the individual character.
-	switch ch {
-	case eof:
-		return EOF, ""
-	case '*':
-		return ASTERISK, string(ch)
-	case ',':
-		return COMMA, string(ch)
-
+	acc.WriteRune(ch)
+	if isQuote(ch) {
+		return tok, acc.String()
 	}
-*/
+	return s.ScanQuoted(tok, acc)
+}
