@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"io"
 )
 
@@ -21,6 +22,13 @@ const (
 
 var eof = rune(0)
 
+
+type tokenTypeChecker func(rune) bool
+
+func isComment(ch rune) bool {
+	return ch == '#'
+}
+
 func isTab(ch rune) bool {
 	return ch == '\t'
 }
@@ -31,6 +39,10 @@ func isSpace(ch rune) bool {
 
 func isNewline(ch rune) bool {
 	return ch == '\n'
+}
+
+func isNotNewline(ch rune) bool {
+	return !isNewline(ch)
 }
 
 
@@ -64,12 +76,31 @@ func (s *Scanner) unread() {
 }
 
 // Scan returns the next token and literal value.
-func (s *Scanner) Scan() (tok Token, lit string) {
+func (s *Scanner) Scan() (Token, string) {
 	// Read the next rune.
 	ch := s.read()
+
+	var buf bytes.Buffer
+	buf.WriteRune(ch)
+
+	if isComment(ch) {
+		return s.ScanContiguous(COMMENT, isNotNewline, buf)
+	}
+	
 	return ILLEGAL, string(ch)
 }
-	
+
+func (s *Scanner) ScanContiguous(tok Token, checker tokenTypeChecker, acc bytes.Buffer) (Token, string) {
+	next := s.Read()
+	if checker(next) {
+		acc.WriteRune(next)
+		return s.ScanContiguous(tok, checker, acc)
+	}
+	s.unread()
+	return tok, acc.String()
+}
+
+
 
 	// If we see whitespace then consume all contiguous whitespace.
 	// If we see a letter then consume as an ident or reserved word.

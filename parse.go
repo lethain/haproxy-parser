@@ -23,8 +23,13 @@ type Section struct {
 func Parse(r io.Reader) ([]Section, error) {
 	sc := NewScanner(r)
 
-	tok, lit := sc.Scan()
-	fmt.Printf("%v: %v\n", tok, lit)
+	for {
+		tok, lit := sc.Scan()
+		fmt.Printf("%v: %v\n", tok, lit)
+		if tok == EOF || tok == ILLEGAL {
+			break
+		}		
+	}
 
 	// translate..
 	sections := make([]Section, 0)
