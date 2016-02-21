@@ -5,20 +5,18 @@ package main
 
 import (
 	"flag"
-	"io"
 	"fmt"
+	"io"
 	"os"
 )
-
 
 var filepath = flag.String("filepath", "haproxy.cfg", "path to haproxy configuration file")
 
 type Section struct {
-	Heading string
+	Heading  string
 	Settings map[string]string
-	Flags []string
+	Flags    []string
 }
-
 
 func Parse(r io.Reader) ([]Section, error) {
 	sc := NewScanner(r)
@@ -28,14 +26,13 @@ func Parse(r io.Reader) ([]Section, error) {
 		fmt.Printf("%v:\t%v\n", humanTokens[tok], lit)
 		if tok == EOF || tok == ILLEGAL {
 			break
-		}		
+		}
 	}
 
 	// translate..
 	sections := make([]Section, 0)
 	return sections, nil
 }
-
 
 func main() {
 	flag.Parse()

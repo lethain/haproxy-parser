@@ -7,6 +7,7 @@ import (
 )
 
 type Token int
+
 const (
 	ILLEGAL Token = iota
 	EOF
@@ -17,20 +18,17 @@ const (
 	STRING
 )
 
-var humanTokens = map[Token]string {
+var humanTokens = map[Token]string{
 	ILLEGAL: "ILLEGAL",
-	EOF: "EOF",
+	EOF:     "EOF",
 	COMMENT: "COMMENT",
-	SPACE: "SPACE",
+	SPACE:   "SPACE",
 	NEWLINE: "NEWLINE",
-	TAB: "TAB",
-	STRING: "STRING",
+	TAB:     "TAB",
+	STRING:  "STRING",
 }
 
-
-
 var eof = rune(0)
-
 
 type tokenTypeChecker func(rune) bool
 
@@ -57,7 +55,6 @@ func isNotNewline(ch rune) bool {
 func isQuote(ch rune) bool {
 	return ch == '"'
 }
-
 
 func isLetter(ch rune) bool {
 	return !(isQuote(ch) || isNewline(ch) || isSpace(ch) || isTab(ch) || ch == eof)
