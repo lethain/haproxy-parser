@@ -48,8 +48,12 @@ func isNewline(ch rune) bool {
 	return ch == '\n'
 }
 
+func isEOF(ch rune) bool {
+	return ch == eof
+}
+
 func isNotNewline(ch rune) bool {
-	return !isNewline(ch)
+	return !(isNewline(ch) || isEOF(ch))
 }
 
 func isQuote(ch rune) bool {
@@ -57,7 +61,7 @@ func isQuote(ch rune) bool {
 }
 
 func isLetter(ch rune) bool {
-	return !(isQuote(ch) || isNewline(ch) || isSpace(ch) || isTab(ch) || ch == eof)
+	return !(isQuote(ch) || isNewline(ch) || isSpace(ch) || isTab(ch) || isEOF(ch))
 	// return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || ch == '.' || ch == '/' || ch == ':' || (ch >= '0' && ch <= '9') || ch == '-' || ch == '_' || ch == '\\' || ch == '(' || ch == ')'
 }
 
@@ -106,7 +110,7 @@ func (s *Scanner) Scan() (Token, string) {
 		return s.ScanContiguous(STRING, isLetter, buf)
 	} else if isSpace(ch) {
 		return s.ScanContiguous(SPACE, isSpace, buf)
-	} else if ch == eof {
+	} else if isEOF(ch) {
 		return EOF, ""
 	}
 

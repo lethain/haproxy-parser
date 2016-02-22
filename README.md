@@ -3,6 +3,6 @@ transforming them into JSON.
 
 Running:
 
-    go run *.go haproxy.cfg
+    go run {parse,scanner}.go haproxy.cfg
 
 This is far from feature complete, and approach is [based on this blog post](https://blog.gopheracademy.com/advent-2014/parsers-lexers/).
