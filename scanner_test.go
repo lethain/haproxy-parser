@@ -1,8 +1,8 @@
 package main
 
 import (
-	"testing"
 	"strings"
+	"testing"
 )
 
 func MatchTokens(t *testing.T, expected []TokenString, sc *Scanner) {
@@ -30,7 +30,7 @@ func TestScanEOF(t *testing.T) {
 	MatchTokens(t, tokens, sc)
 }
 
-func TestScanComment(t * testing.T) {
+func TestScanComment(t *testing.T) {
 	fin := strings.NewReader("# this is stupid\n# this is still stupid")
 	sc := NewScanner(fin)
 	tokens := []TokenString{
@@ -42,7 +42,7 @@ func TestScanComment(t * testing.T) {
 	MatchTokens(t, tokens, sc)
 }
 
-func TestScanSection(t * testing.T) {
+func TestScanSection(t *testing.T) {
 	str := "# test\n"
 	str += "global\n"
 	str += "\tlog /dev/log local0 err\n"
