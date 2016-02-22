@@ -5,20 +5,19 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"io"
 	"os"
-	"errors"
 )
 
 var filepath = flag.String("filepath", "haproxy.cfg", "path to haproxy configuration file")
 var EOFError = errors.New("end of file")
 
-
 type Server struct {
-	Name string
-	IP string
+	Name     string
+	IP       string
 	FullText string
 }
 
@@ -29,7 +28,7 @@ func (s *Server) String() string {
 type Section struct {
 	Heading  string
 	FullText string
-	Servers []Server
+	Servers  []Server
 }
 
 func (s *Section) String() string {
@@ -80,7 +79,7 @@ func NewSection(ts []TokenString) (Section, error) {
 	for _, t := range ts {
 		sect.FullText += t.S
 	}
-	
+
 	// get heading
 	headerTs, restTs := CollectTokenStringsUntil(NEWLINE, ts)
 	for _, t := range headerTs {
@@ -98,7 +97,7 @@ func NewSection(ts []TokenString) (Section, error) {
 		lineTs, restTs = CollectTokenStringsUntil(NEWLINE, restTs)
 		// skip past newline
 		restTs = restTs[1:]
-		
+
 		first := lineTs[0]
 		if first.T == STRING && first.S == "server" {
 			serv := Server{lineTs[2].S, lineTs[4].S, ""}
@@ -127,7 +126,7 @@ func Parse(r io.Reader) ([]Section, error) {
 			tok, lit = DiscardUntil(STRING, sc)
 			continue
 		}
-		
+
 		ts = append(ts, TokenString{tok, lit})
 		ts, tok, lit = CollectUntil(NEWLINE, sc, ts)
 		if tok == EOF || tok == ILLEGAL {
@@ -140,7 +139,7 @@ func Parse(r io.Reader) ([]Section, error) {
 				break
 			}
 			ts, tok, lit = CollectUntil(NEWLINE, sc, ts)
-			ts = append(ts, TokenString{tok, lit})			
+			ts = append(ts, TokenString{tok, lit})
 		}
 
 		// transform collected tokens into a section
@@ -171,6 +170,6 @@ func main() {
 	marshalled, err := json.MarshalIndent(parsed, "", "  ")
 	if err != nil {
 		panic(err)
-	}	
+	}
 	os.Stdout.Write(marshalled)
 }
