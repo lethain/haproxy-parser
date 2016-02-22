@@ -1,6 +1,3 @@
-/*
-Initial approach based largely on https://blog.gopheracademy.com/advent-2014/parsers-lexers/
-*/
 package main
 
 import (
